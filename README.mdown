@@ -1,0 +1,3 @@
+# Synethesia Camera
+
+Goal: To input an image and produce a melody
