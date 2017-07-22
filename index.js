@@ -3,13 +3,16 @@ var NodeSynth = require('nodesynth');
 var pad = require('pad-left');
 require('nodesynth/notes');
 
-var notes = [C4, D4, E4, F4, G4, A5, B5, C5]
+let notes = [C4, D4, E4, F4, G4, A5, B5, C5]
+var notes_to_play = []
 var image = process.argv[2];
 var width;
 var height;
 
 var pixels_map;
+
 getPixels(image, function(err, pixels) {
+
   if(err) {
     console.log("Bad image path")
     return
@@ -23,9 +26,14 @@ for (ii=0;ii<5;ii++)
 {
   for (jj=0;jj<5;jj++)
   {
-  console.log(pixelatedBlob(pixels, ii, jj,blob_width, blob_height));
+    blob = pixelatedBlob(pixels, ii, jj,blob_width, blob_height);
+    blob_as_percentage = blob / (256*256*256);
+    notes_to_play.push(Math.round(notes.length*blob_as_percentage)) ;
+
   }
 }
+console.log(notes_to_play);
+playPixels(notes_to_play);
 
 })
 
@@ -34,6 +42,7 @@ function pixelatedBlob(pixels, x,y, width, height) {
   var red = 0;
   var green = 0;
   var blue = 0;
+  var pixels_in_blob = width*height;
 
   var x_start = x*width;
   var x_end = x_start + width;
@@ -48,12 +57,12 @@ function pixelatedBlob(pixels, x,y, width, height) {
         blue += pixels.get(xx,yy,2);
       }
   }
-  return pad(Math.round(red/62500).toString(16),2,'0') + pad(Math.round(green/62500).toString(16),2,'0') +  pad(Math.round(blue/62500).toString(16),2,'0');
+  return (Math.round(red/pixels_in_blob) * 65536) + (Math.round(green/pixels_in_blob)* 256) + Math.round(blue/pixels_in_blob);
 }
 
-function playPixels(pixels) {
+function playPixels(notes) {
 
   var ns = new NodeSynth.Synth({bitDepth: 16, sampleRate: 44100});
   ns.play();
-  //ns.source = new NodeSynth.Oscillator('cos', function(t){return notes[pixels.get(Math.ceil(t*10)]*4,0)});
+  ns.source = new NodeSynth.Oscillator('sin', function(t){return 293 + 29 * notes[Math.floor(t)%25]});
 }
