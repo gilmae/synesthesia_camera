@@ -8,7 +8,7 @@ var notes_to_play = []
 var image = process.argv[2];
 var width;
 var height;
-
+const squares = 5;
 var pixels_map;
 
 getPixels(image, function(err, pixels) {
@@ -19,12 +19,12 @@ getPixels(image, function(err, pixels) {
   }
 
   var dimensions = pixels.shape;
-  var blob_width = Math.floor(pixels.shape[0]/5);
-  var blob_height = Math.floor(pixels.shape[1]/5);
+  var blob_width = Math.floor(pixels.shape[0]/squares);
+  var blob_height = Math.floor(pixels.shape[1]/squares);
 
-for (ii=0;ii<5;ii++)
+for (ii=0;ii<squares;ii++)
 {
-  for (jj=0;jj<5;jj++)
+  for (jj=0;jj<squares;jj++)
   {
     blob = pixelatedBlob(pixels, ii, jj,blob_width, blob_height);
     blob_as_percentage = blob / (256*256*256);
@@ -60,9 +60,9 @@ function pixelatedBlob(pixels, x,y, width, height) {
   return (Math.round(red/pixels_in_blob) * 65536) + (Math.round(green/pixels_in_blob)* 256) + Math.round(blue/pixels_in_blob);
 }
 
-function playPixels(notes) {
-
+function playPixels(notes)
+{
   var ns = new NodeSynth.Synth({bitDepth: 16, sampleRate: 44100});
   ns.play();
-  ns.source = new NodeSynth.Oscillator('sin', function(t){return 293 + 29 * notes[Math.floor(t)%25]});
+  ns.source = new NodeSynth.Oscillator('sin', function(t){return 293 + 29 * notes[Math.floor(t)%(squares*squares)]});
 }
